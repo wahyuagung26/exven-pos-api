@@ -351,7 +351,6 @@ func (s *Seeder) SeedDemoUsers(tenantID uint64) error {
 		{
 			TenantID:     tenantID,
 			RoleID:       ownerRole.ID,
-			Username:     "owner",
 			Email:        "owner@demo.com",
 			PasswordHash: hashedPassword,
 			FullName:     "Demo Owner",
@@ -361,7 +360,6 @@ func (s *Seeder) SeedDemoUsers(tenantID uint64) error {
 		{
 			TenantID:     tenantID,
 			RoleID:       managerRole.ID,
-			Username:     "manager",
 			Email:        "manager@demo.com",
 			PasswordHash: hashedPassword,
 			FullName:     "Demo Manager",
@@ -371,7 +369,6 @@ func (s *Seeder) SeedDemoUsers(tenantID uint64) error {
 		{
 			TenantID:     tenantID,
 			RoleID:       cashierRole.ID,
-			Username:     "cashier1",
 			Email:        "cashier1@demo.com",
 			PasswordHash: hashedPassword,
 			FullName:     "Demo Cashier 1",
@@ -381,7 +378,6 @@ func (s *Seeder) SeedDemoUsers(tenantID uint64) error {
 		{
 			TenantID:     tenantID,
 			RoleID:       cashierRole.ID,
-			Username:     "cashier2",
 			Email:        "cashier2@demo.com",
 			PasswordHash: hashedPassword,
 			FullName:     "Demo Cashier 2",
@@ -392,17 +388,17 @@ func (s *Seeder) SeedDemoUsers(tenantID uint64) error {
 
 	for _, user := range users {
 		var existingUser database.User
-		if err := s.db.Where("tenant_id = ? AND username = ?", user.TenantID, user.Username).First(&existingUser).Error; err != nil {
+		if err := s.db.Where("tenant_id = ? AND email = ?", user.TenantID, user.Email).First(&existingUser).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				if err := s.db.Create(&user).Error; err != nil {
-					return fmt.Errorf("failed to create user %s: %w", user.Username, err)
+					return fmt.Errorf("failed to create user %s: %w", user.Email, err)
 				}
-				fmt.Printf("Created user: %s (%s)\n", user.Username, user.FullName)
+				fmt.Printf("Created user: %s (%s)\n", user.Email, user.FullName)
 			} else {
-				return fmt.Errorf("failed to check existing user %s: %w", user.Username, err)
+				return fmt.Errorf("failed to check existing user %s: %w", user.Email, err)
 			}
 		} else {
-			fmt.Printf("User %s already exists, skipping...\n", user.Username)
+			fmt.Printf("User %s already exists, skipping...\n", user.Email)
 		}
 	}
 
@@ -414,7 +410,7 @@ func (s *Seeder) SeedDemoOutlets(tenantID uint64) error {
 
 	// Get manager user for outlet assignment
 	var managerUser database.User
-	if err := s.db.Where("tenant_id = ? AND username = ?", tenantID, "manager").First(&managerUser).Error; err != nil {
+	if err := s.db.Where("tenant_id = ? AND email = ?", tenantID, "manager@demo.com").First(&managerUser).Error; err != nil {
 		return fmt.Errorf("failed to find manager user: %w", err)
 	}
 

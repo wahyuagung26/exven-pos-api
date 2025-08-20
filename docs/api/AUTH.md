@@ -42,7 +42,7 @@ Authenticate user and get access tokens.
 #### Request Body
 ```json
 {
-  "username": "string",  // required
+  "email": "string",     // required, valid email
   "password": "string"   // required
 }
 ```
@@ -50,7 +50,7 @@ Authenticate user and get access tokens.
 #### Request Example
 ```json
 {
-  "username": "admin",
+  "email": "admin@company.com",
   "password": "password123"
 }
 ```
@@ -66,7 +66,6 @@ Authenticate user and get access tokens.
     "user": {
       "id": 1,
       "tenant_id": 1,
-      "username": "admin",
       "email": "admin@company.com",
       "full_name": "Admin User",
       "phone": "+6281234567890",
@@ -98,7 +97,7 @@ Authenticate user and get access tokens.
   "message": "Validation failed",
   "data": null,
   "errors": {
-    "username": ["Username is required"],
+    "email": ["Email is required"],
     "password": ["Password is required"]
   }
 }
@@ -120,7 +119,6 @@ Create new tenant and user account.
   "business_type": "string",  // optional
   "email": "string",          // required, valid email
   "phone": "string",          // optional
-  "username": "string",       // required, min: 3, max: 100
   "password": "string",       // required, min: 8
   "full_name": "string"       // required, max: 255
 }
@@ -133,7 +131,6 @@ Create new tenant and user account.
   "business_type": "Food & Beverage",
   "email": "owner@mycoffeeshop.com",
   "phone": "+6281234567890",
-  "username": "owner",
   "password": "password123",
   "full_name": "John Doe"
 }
@@ -148,7 +145,6 @@ Create new tenant and user account.
     "user": {
       "id": 1,
       "tenant_id": 1,
-      "username": "owner",
       "email": "owner@mycoffeeshop.com",
       "full_name": "John Doe",
       "phone": "+6281234567890",
@@ -432,7 +428,6 @@ Verify email address using verification token.
 interface UserResponse {
   id: number;
   tenant_id: number;
-  username: string;
   email: string;
   full_name: string;
   phone?: string;
@@ -518,7 +513,7 @@ interface TokenPair {
 curl -X POST https://api.example.com/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "admin",
+    "email": "admin@company.com",
     "password": "password123"
   }'
 ```
@@ -532,7 +527,6 @@ curl -X POST https://api.example.com/api/v1/auth/register \
     "business_type": "Food & Beverage",
     "email": "owner@mycoffeeshop.com",
     "phone": "+6281234567890",
-    "username": "owner",
     "password": "password123",
     "full_name": "John Doe"
   }'

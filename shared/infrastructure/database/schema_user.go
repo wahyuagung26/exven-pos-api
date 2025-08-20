@@ -63,9 +63,8 @@ type Role struct {
 
 type User struct {
 	ID              uint64 `gorm:"primaryKey;autoIncrement"`
-	TenantID        uint64 `gorm:"not null;uniqueIndex:idx_tenant_username;uniqueIndex:idx_tenant_email;index:idx_tenant_active"`
+	TenantID        uint64 `gorm:"not null;uniqueIndex:idx_tenant_email;index:idx_tenant_active"`
 	RoleID          uint64 `gorm:"not null"`
-	Username        string `gorm:"size:100;not null;uniqueIndex:idx_tenant_username"`
 	Email           string `gorm:"size:255;not null;uniqueIndex:idx_tenant_email"`
 	PasswordHash    string `gorm:"size:255;not null"`
 	FullName        string `gorm:"size:255;not null"`

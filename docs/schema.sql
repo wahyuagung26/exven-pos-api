@@ -93,7 +93,6 @@ CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     tenant_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
-    username VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(255) NOT NULL,
@@ -107,7 +106,6 @@ CREATE TABLE users (
     
     FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
     FOREIGN KEY (role_id) REFERENCES roles(id),
-    UNIQUE (tenant_id, username),
     UNIQUE (tenant_id, email)
 );
 

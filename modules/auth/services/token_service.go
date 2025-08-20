@@ -26,7 +26,7 @@ func (s *TokenService) GenerateAccessToken(user *domain.User) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":   user.ID,
 		"tenant_id": user.TenantID,
-		"username":  user.Username,
+		"email":     user.Email,
 		"role_id":   user.RoleID,
 		"exp":       time.Now().Add(s.accessTokenExpiry).Unix(),
 		"iat":       time.Now().Unix(),
@@ -93,9 +93,9 @@ func (s *TokenService) validateToken(tokenString string, tokenType string) (*dom
 		return nil, fmt.Errorf("invalid tenant_id in token")
 	}
 
-	username, ok := claims["username"].(string)
+	email, ok := claims["email"].(string)
 	if !ok && tokenType == "access" {
-		return nil, fmt.Errorf("invalid username in token")
+		return nil, fmt.Errorf("invalid email in token")
 	}
 
 	roleID := float64(0)
@@ -114,7 +114,7 @@ func (s *TokenService) validateToken(tokenString string, tokenType string) (*dom
 	return &domain.TokenClaims{
 		UserID:    uint64(userID),
 		TenantID:  uint64(tenantID),
-		Username:  username,
+		Email:     email,
 		RoleID:    uint64(roleID),
 		ExpiresAt: time.Unix(int64(exp), 0),
 	}, nil

@@ -9,9 +9,8 @@ import (
 // UserModel maps to the database users table
 type UserModel struct {
 	ID              uint64 `gorm:"primaryKey;autoIncrement"`
-	TenantID        uint64 `gorm:"not null;uniqueIndex:idx_tenant_username;uniqueIndex:idx_tenant_email;index:idx_tenant_active"`
+	TenantID        uint64 `gorm:"not null;uniqueIndex:idx_tenant_email;index:idx_tenant_active"`
 	RoleID          uint64 `gorm:"not null"`
-	Username        string `gorm:"size:100;not null;uniqueIndex:idx_tenant_username"`
 	Email           string `gorm:"size:255;not null;uniqueIndex:idx_tenant_email"`
 	PasswordHash    string `gorm:"size:255;not null"`
 	FullName        string `gorm:"size:255;not null"`
@@ -79,7 +78,6 @@ func (u *UserModel) ToDomainUser() *domain.User {
 		ID:              u.ID,
 		TenantID:        u.TenantID,
 		RoleID:          u.RoleID,
-		Username:        u.Username,
 		Email:           u.Email,
 		PasswordHash:    u.PasswordHash,
 		FullName:        u.FullName,
@@ -100,7 +98,6 @@ func (u *UserModel) FromDomainUser(user *domain.User) {
 	u.ID = user.ID
 	u.TenantID = user.TenantID
 	u.RoleID = user.RoleID
-	u.Username = user.Username
 	u.Email = user.Email
 	u.PasswordHash = user.PasswordHash
 	u.FullName = user.FullName

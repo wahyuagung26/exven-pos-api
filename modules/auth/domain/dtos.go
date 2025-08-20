@@ -21,7 +21,6 @@ type RegisterRequest struct {
 	BusinessType string `json:"business_type"`
 	Email        string `json:"email" validate:"required,email"`
 	Phone        string `json:"phone"`
-	Username     string `json:"username" validate:"required,min=3,max=100"`
 	Password     string `json:"password" validate:"required,min=8"`
 	FullName     string `json:"full_name" validate:"required,max=255"`
 }
@@ -35,7 +34,6 @@ type RegisterResponse struct {
 type UserResponse struct {
 	ID       uint64       `json:"id"`
 	TenantID uint64       `json:"tenant_id"`
-	Username string       `json:"username"`
 	Email    string       `json:"email"`
 	FullName string       `json:"full_name"`
 	Phone    string       `json:"phone,omitempty"`

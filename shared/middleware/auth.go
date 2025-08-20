@@ -47,12 +47,12 @@ func JWTAuth(secret string) echo.MiddlewareFunc {
 
 			userID := uint64(claims["user_id"].(float64))
 			tenantID := uint64(claims["tenant_id"].(float64))
-			username := claims["username"].(string)
+			email := claims["email"].(string)
 			roleID := uint64(claims["role_id"].(float64))
 
 			c.Set("user_id", userID)
 			c.Set("tenant_id", tenantID)
-			c.Set("username", username)
+			c.Set("email", email)
 			c.Set("role_id", roleID)
 
 			return next(c)

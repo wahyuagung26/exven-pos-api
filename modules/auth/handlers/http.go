@@ -38,7 +38,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	credentials := domain.LoginCredentials{
-		Username: req.Username,
+		Email:    req.Email,
 		Password: req.Password,
 	}
 
@@ -54,7 +54,6 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		User: domain.UserResponse{
 			ID:       user.ID,
 			TenantID: user.TenantID,
-			Username: user.Username,
 			Email:    user.Email,
 			FullName: user.FullName,
 			Phone:    user.Phone,
@@ -94,7 +93,6 @@ func (h *AuthHandler) Register(c echo.Context) error {
 		User: domain.UserResponse{
 			ID:       user.ID,
 			TenantID: user.TenantID,
-			Username: user.Username,
 			Email:    user.Email,
 			FullName: user.FullName,
 			Phone:    user.Phone,

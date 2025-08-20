@@ -35,14 +35,10 @@ func NewAuthService(
 }
 
 func (s *AuthService) Login(ctx context.Context, credentials domain.LoginCredentials) (*domain.TokenPair, *domain.User, error) {
-	// Try to find user by username first (globally across all tenants)
-	user, err := s.userRepo.FindByUsernameGlobal(ctx, credentials.Username)
+	// Find user by email (globally across all tenants)
+	user, err := s.userRepo.FindByEmailGlobal(ctx, credentials.Email)
 	if err != nil {
-		// If username not found, try by email
-		user, err = s.userRepo.FindByEmailGlobal(ctx, credentials.Username)
-		if err != nil {
-			return nil, nil, fmt.Errorf("invalid credentials")
-		}
+		return nil, nil, fmt.Errorf("invalid credentials")
 	}
 
 	if !user.IsActive {
@@ -84,8 +80,8 @@ func (s *AuthService) Login(ctx context.Context, credentials domain.LoginCredent
 	}
 
 	event := messaging.NewEvent("user.logged_in", user.TenantID, user.ID, map[string]interface{}{
-		"username": user.Username,
-		"ip":       ctx.Value("ip"),
+		"email": user.Email,
+		"ip":    ctx.Value("ip"),
 	})
 
 	fmt.Printf("Publishing login event, eventBus is nil: %t\n", s.eventBus == nil)
@@ -109,7 +105,6 @@ func (s *AuthService) Register(ctx context.Context, req domain.RegisterRequest) 
 	}
 
 	user := &domain.User{
-		Username:  req.Username,
 		Email:     req.Email,
 		FullName:  req.FullName,
 		Phone:     req.Phone,
@@ -125,8 +120,7 @@ func (s *AuthService) Register(ctx context.Context, req domain.RegisterRequest) 
 	}
 
 	event := messaging.NewEvent("user.registered", user.TenantID, user.ID, map[string]interface{}{
-		"username": user.Username,
-		"email":    user.Email,
+		"email": user.Email,
 	})
 	s.eventBus.Publish(ctx, "auth.register", event)
 

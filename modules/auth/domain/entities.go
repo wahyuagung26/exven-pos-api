@@ -8,7 +8,6 @@ type User struct {
 	ID              uint64
 	TenantID        uint64
 	RoleID          uint64
-	Username        string
 	Email           string
 	PasswordHash    string
 	FullName        string
@@ -70,7 +69,7 @@ type TokenPair struct {
 type TokenClaims struct {
 	UserID    uint64
 	TenantID  uint64
-	Username  string
+	Email     string
 	RoleID    uint64
 	ExpiresAt time.Time
 }
