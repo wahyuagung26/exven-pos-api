@@ -12,6 +12,7 @@ import (
 	"github.com/exven/pos-system/internal/config"
 	"github.com/exven/pos-system/internal/server"
 	"github.com/exven/pos-system/modules/auth"
+	"github.com/exven/pos-system/modules/products"
 	"github.com/exven/pos-system/shared/container"
 	"github.com/exven/pos-system/shared/infrastructure/cache"
 	"github.com/exven/pos-system/shared/infrastructure/database"
@@ -72,6 +73,9 @@ func main() {
 
 	authModule := auth.NewModule(di, db, redisClient, eventBus, cfg.JWT)
 	authModule.Register()
+
+	productsModule := products.NewModule(di, db, eventBus)
+	productsModule.Register()
 
 	srv := server.New(cfg, di)
 	log.Println("Server instance created successfully")

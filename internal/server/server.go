@@ -8,11 +8,13 @@ import (
 	"github.com/exven/pos-system/internal/config"
 	"github.com/exven/pos-system/modules/auth/domain"
 	"github.com/exven/pos-system/modules/auth/handlers"
+	"github.com/exven/pos-system/modules/products"
 	"github.com/exven/pos-system/shared/container"
 	"github.com/exven/pos-system/shared/middleware"
 	"github.com/exven/pos-system/shared/validator"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	"gorm.io/gorm"
 )
 
 type Server struct {
@@ -85,6 +87,12 @@ func (s *Server) registerRoutes() {
 	protected := api.Group("")
 	protected.Use(middleware.JWTAuth(s.config.JWT.Secret))
 	protected.Use(middleware.TenantContext())
+
+	// Get the products module and register its routes
+	db := s.container.MustGet("db").(*gorm.DB)
+	productsModule := products.NewModule(s.container, db, nil)
+	productHandler := productsModule.GetHandler()
+	productHandler.RegisterRoutes(protected)
 
 }
 
