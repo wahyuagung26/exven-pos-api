@@ -33,22 +33,36 @@ func (m *Module) Register() {
 		return persistence.NewProductCategoryRepository(m.db)
 	})
 
+	m.container.RegisterSingleton("products.productRepository", func() interface{} {
+		return persistence.NewProductRepository(m.db)
+	})
+
 	// Register services
 	m.container.RegisterSingleton("products.categoryService", func() interface{} {
 		repo := persistence.NewProductCategoryRepository(m.db)
 		return services.NewProductCategoryService(repo)
 	})
 
+	m.container.RegisterSingleton("products.productService", func() interface{} {
+		productRepo := persistence.NewProductRepository(m.db)
+		categoryRepo := persistence.NewProductCategoryRepository(m.db)
+		return services.NewProductService(productRepo, categoryRepo)
+	})
+
 	// Register handlers
 	m.container.RegisterSingleton("products.handler", func() interface{} {
 		categoryRepo := persistence.NewProductCategoryRepository(m.db)
 		categoryService := services.NewProductCategoryService(categoryRepo)
-		return handlers.NewProductHandler(categoryService)
+		productRepo := persistence.NewProductRepository(m.db)
+		productService := services.NewProductService(productRepo, categoryRepo)
+		return handlers.NewProductHandler(categoryService, productService)
 	})
 }
 
 func (m *Module) GetHandler() *handlers.ProductHandler {
 	categoryRepo := persistence.NewProductCategoryRepository(m.db)
 	categoryService := services.NewProductCategoryService(categoryRepo)
-	return handlers.NewProductHandler(categoryService)
+	productRepo := persistence.NewProductRepository(m.db)
+	productService := services.NewProductService(productRepo, categoryRepo)
+	return handlers.NewProductHandler(categoryService, productService)
 }

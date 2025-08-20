@@ -22,7 +22,7 @@ type DIContainer struct {
 }
 
 type service struct {
-	factory    interface{}
+	factory     interface{}
 	isSingleton bool
 }
 
@@ -123,7 +123,7 @@ func (c *DIContainer) Resolve(target interface{}) error {
 	}
 
 	targetType := targetElem.Type()
-	
+
 	for name, svc := range c.services {
 		factoryType := reflect.TypeOf(svc.factory)
 		if factoryType.NumOut() == 0 {
@@ -158,7 +158,7 @@ func (c *DIContainer) createInstance(factory interface{}) interface{} {
 	args := make([]reflect.Value, factoryType.NumIn())
 	for i := 0; i < factoryType.NumIn(); i++ {
 		argType := factoryType.In(i)
-		
+
 		for _, svc := range c.services {
 			svcType := reflect.TypeOf(svc.factory)
 			if svcType.NumOut() > 0 && svcType.Out(0) == argType {
@@ -167,7 +167,7 @@ func (c *DIContainer) createInstance(factory interface{}) interface{} {
 				break
 			}
 		}
-		
+
 		if !args[i].IsValid() {
 			args[i] = reflect.Zero(argType)
 		}

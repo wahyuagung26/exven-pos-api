@@ -55,9 +55,9 @@ type RabbitMQConfig struct {
 }
 
 type JWTConfig struct {
-	Secret              string
-	ExpiryHours         int
-	RefreshExpiryDays   int
+	Secret            string
+	ExpiryHours       int
+	RefreshExpiryDays int
 }
 
 type CORSConfig struct {

@@ -19,10 +19,10 @@ type ProductCategory struct {
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 
-	Tenant         Tenant            `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
-	Parent         *ProductCategory  `gorm:"foreignKey:ParentID;constraint:OnDelete:SET NULL"`
-	SubCategories  []ProductCategory `gorm:"foreignKey:ParentID"`
-	Products       []Product         `gorm:"foreignKey:CategoryID"`
+	Tenant        Tenant            `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
+	Parent        *ProductCategory  `gorm:"foreignKey:ParentID;constraint:OnDelete:SET NULL"`
+	SubCategories []ProductCategory `gorm:"foreignKey:ParentID"`
+	Products      []Product         `gorm:"foreignKey:CategoryID"`
 }
 
 type JSONArray []string
@@ -86,11 +86,11 @@ type Product struct {
 	CreatedAt    time.Time    `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time    `gorm:"autoUpdateTime"`
 
-	Tenant         Tenant         `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
-	Category       *ProductCategory `gorm:"foreignKey:CategoryID;constraint:OnDelete:SET NULL"`
-	ProductStocks  []ProductStock `gorm:"foreignKey:ProductID"`
+	Tenant           Tenant            `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
+	Category         *ProductCategory  `gorm:"foreignKey:CategoryID;constraint:OnDelete:SET NULL"`
+	ProductStocks    []ProductStock    `gorm:"foreignKey:ProductID"`
 	TransactionItems []TransactionItem `gorm:"foreignKey:ProductID"`
-	StockMovements []StockMovement `gorm:"foreignKey:ProductID"`
+	StockMovements   []StockMovement   `gorm:"foreignKey:ProductID"`
 }
 
 type ProductStock struct {

@@ -8,6 +8,7 @@ import (
 	"github.com/exven/pos-system/internal/config"
 	"github.com/exven/pos-system/modules/auth/domain"
 	"github.com/exven/pos-system/modules/auth/handlers"
+	"github.com/exven/pos-system/modules/outlets"
 	"github.com/exven/pos-system/modules/products"
 	"github.com/exven/pos-system/shared/container"
 	"github.com/exven/pos-system/shared/middleware"
@@ -36,13 +37,13 @@ func New(cfg *config.Config, container container.Container) *Server {
 	e.Use(echoMiddleware.LoggerWithConfig(echoMiddleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}, error=${error}, latency=${latency_human}\n",
 	}))
-	
+
 	// Enable panic recovery with detailed stack traces
 	e.Use(echoMiddleware.RecoverWithConfig(echoMiddleware.RecoverConfig{
 		StackSize: 1 << 10, // 1 KB
 		LogLevel:  1,       // DEBUG level
 	}))
-	
+
 	e.Use(echoMiddleware.RequestID())
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
@@ -93,6 +94,11 @@ func (s *Server) registerRoutes() {
 	productsModule := products.NewModule(s.container, db, nil)
 	productHandler := productsModule.GetHandler()
 	productHandler.RegisterRoutes(protected)
+
+	// Get the outlets module and register its routes
+	outletsModule := outlets.NewModule(s.container, db, nil)
+	outletHandler := outletsModule.GetHandler()
+	outletHandler.RegisterRoutes(protected)
 
 }
 

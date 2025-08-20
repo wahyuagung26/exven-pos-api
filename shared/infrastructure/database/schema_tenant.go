@@ -57,23 +57,23 @@ func (SubscriptionPlan) TableName() string {
 }
 
 type Tenant struct {
-	ID         uint64     `gorm:"primaryKey;autoIncrement"`
-	Name       string     `gorm:"size:255;not null"`
-	BusinessType string   `gorm:"size:100"`
-	Email      string     `gorm:"size:255;uniqueIndex;not null"`
-	Phone      string     `gorm:"size:20"`
-	Address    string     `gorm:"type:text"`
-	City       string     `gorm:"size:100"`
-	Province   string     `gorm:"size:100"`
-	PostalCode string     `gorm:"size:10"`
-	TaxNumber  string     `gorm:"size:50"`
-	LogoURL    string     `gorm:"size:500"`
-	Timezone   string     `gorm:"size:50;default:'Asia/Jakarta'"`
-	Currency   string     `gorm:"size:3;default:'IDR'"`
-	IsActive   bool       `gorm:"default:true;index"`
-	TrialEndsAt *time.Time
-	CreatedAt  time.Time `gorm:"autoCreateTime"`
-	UpdatedAt  time.Time `gorm:"autoUpdateTime"`
+	ID           uint64 `gorm:"primaryKey;autoIncrement"`
+	Name         string `gorm:"size:255;not null"`
+	BusinessType string `gorm:"size:100"`
+	Email        string `gorm:"size:255;uniqueIndex;not null"`
+	Phone        string `gorm:"size:20"`
+	Address      string `gorm:"type:text"`
+	City         string `gorm:"size:100"`
+	Province     string `gorm:"size:100"`
+	PostalCode   string `gorm:"size:10"`
+	TaxNumber    string `gorm:"size:50"`
+	LogoURL      string `gorm:"size:500"`
+	Timezone     string `gorm:"size:50;default:'Asia/Jakarta'"`
+	Currency     string `gorm:"size:3;default:'IDR'"`
+	IsActive     bool   `gorm:"default:true;index"`
+	TrialEndsAt  *time.Time
+	CreatedAt    time.Time `gorm:"autoCreateTime"`
+	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
 
 	Subscriptions []TenantSubscription `gorm:"foreignKey:TenantID"`
 	Users         []User               `gorm:"foreignKey:TenantID"`
@@ -81,16 +81,16 @@ type Tenant struct {
 }
 
 type TenantSubscription struct {
-	ID                 uint64    `gorm:"primaryKey;autoIncrement"`
-	TenantID           uint64    `gorm:"not null;index:idx_tenant_status"`
-	SubscriptionPlanID uint64    `gorm:"not null"`
+	ID                 uint64             `gorm:"primaryKey;autoIncrement"`
+	TenantID           uint64             `gorm:"not null;index:idx_tenant_status"`
+	SubscriptionPlanID uint64             `gorm:"not null"`
 	Status             SubscriptionStatus `gorm:"default:'pending';index:idx_tenant_status"`
-	StartsAt           time.Time `gorm:"not null"`
-	EndsAt             time.Time `gorm:"not null;index"`
-	AutoRenew          bool      `gorm:"default:true"`
-	PaymentMethod      string    `gorm:"size:50"`
-	CreatedAt          time.Time `gorm:"autoCreateTime"`
-	UpdatedAt          time.Time `gorm:"autoUpdateTime"`
+	StartsAt           time.Time          `gorm:"not null"`
+	EndsAt             time.Time          `gorm:"not null;index"`
+	AutoRenew          bool               `gorm:"default:true"`
+	PaymentMethod      string             `gorm:"size:50"`
+	CreatedAt          time.Time          `gorm:"autoCreateTime"`
+	UpdatedAt          time.Time          `gorm:"autoUpdateTime"`
 
 	Tenant           Tenant           `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
 	SubscriptionPlan SubscriptionPlan `gorm:"foreignKey:SubscriptionPlanID"`

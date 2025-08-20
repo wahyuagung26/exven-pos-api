@@ -208,7 +208,7 @@ func (s *ProductCategoryService) getAllDescendants(ctx context.Context, tenantID
 
 	for _, child := range children {
 		descendants = append(descendants, child)
-		
+
 		// Recursively get grandchildren
 		grandchildren, err := s.getAllDescendants(ctx, tenantID, child.ID)
 		if err != nil {

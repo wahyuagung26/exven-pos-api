@@ -5,10 +5,10 @@ import (
 )
 
 type ArchivedTransaction struct {
-	ID                    uint64                `gorm:"primaryKey"`
-	TenantID              uint64                `gorm:"not null;index:idx_archived_transactions_tenant_date;index:idx_archived_trans_tenant_date"`
-	OutletID              uint64                `gorm:"not null"`
-	CashierID             uint64                `gorm:"not null"`
+	ID                    uint64 `gorm:"primaryKey"`
+	TenantID              uint64 `gorm:"not null;index:idx_archived_transactions_tenant_date;index:idx_archived_trans_tenant_date"`
+	OutletID              uint64 `gorm:"not null"`
+	CashierID             uint64 `gorm:"not null"`
 	CustomerID            *uint64
 	CustomerNameSnapshot  string                `gorm:"size:255"`
 	CustomerPhoneSnapshot string                `gorm:"size:20"`
@@ -32,7 +32,7 @@ type ArchivedTransaction struct {
 	ArchivedAt            time.Time             `gorm:"autoCreateTime;index:idx_archived_transactions_archived_date"`
 	ArchivedReason        string                `gorm:"size:100;default:'data_retention_policy'"`
 
-	ArchivedTransactionItems   []ArchivedTransactionItem   `gorm:"foreignKey:TransactionID"`
+	ArchivedTransactionItems    []ArchivedTransactionItem    `gorm:"foreignKey:TransactionID"`
 	ArchivedTransactionPayments []ArchivedTransactionPayment `gorm:"foreignKey:TransactionID"`
 }
 

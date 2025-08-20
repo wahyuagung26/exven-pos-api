@@ -1,11 +1,11 @@
 package persistence
 
 import (
-	"time"
-	"encoding/json"
 	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"github.com/exven/pos-system/modules/products/domain"
+	"time"
 )
 
 type ProductCategoryModel struct {
@@ -68,23 +68,23 @@ func (j *JSONVariantsModel) Scan(value interface{}) error {
 }
 
 type ProductModel struct {
-	ID           uint64             `gorm:"primaryKey;autoIncrement"`
-	TenantID     uint64             `gorm:"not null;uniqueIndex:idx_products_tenant_sku;index:idx_products_tenant_category"`
-	CategoryID   *uint64            `gorm:"index:idx_products_tenant_category"`
-	SKU          string             `gorm:"size:100;not null;uniqueIndex:idx_products_tenant_sku"`
-	Barcode      string             `gorm:"size:100;index:idx_products_barcode"`
-	Name         string             `gorm:"size:255;not null;index:idx_products_name"`
-	Description  string             `gorm:"type:text"`
-	Unit         string             `gorm:"size:50;default:'pcs'"`
-	CostPrice    float64            `gorm:"type:decimal(12,2);default:0.00"`
-	SellingPrice float64            `gorm:"type:decimal(12,2);not null"`
-	MinStock     int                `gorm:"default:0"`
-	TrackStock   bool               `gorm:"default:true"`
-	IsActive     bool               `gorm:"default:true"`
-	Images       JSONArrayModel     `gorm:"type:jsonb"`
-	Variants     JSONVariantsModel  `gorm:"type:jsonb"`
-	CreatedAt    time.Time          `gorm:"autoCreateTime"`
-	UpdatedAt    time.Time          `gorm:"autoUpdateTime"`
+	ID           uint64            `gorm:"primaryKey;autoIncrement"`
+	TenantID     uint64            `gorm:"not null;uniqueIndex:idx_products_tenant_sku;index:idx_products_tenant_category"`
+	CategoryID   *uint64           `gorm:"index:idx_products_tenant_category"`
+	SKU          string            `gorm:"size:100;not null;uniqueIndex:idx_products_tenant_sku"`
+	Barcode      string            `gorm:"size:100;index:idx_products_barcode"`
+	Name         string            `gorm:"size:255;not null;index:idx_products_name"`
+	Description  string            `gorm:"type:text"`
+	Unit         string            `gorm:"size:50;default:'pcs'"`
+	CostPrice    float64           `gorm:"type:decimal(12,2);default:0.00"`
+	SellingPrice float64           `gorm:"type:decimal(12,2);not null"`
+	MinStock     int               `gorm:"default:0"`
+	TrackStock   bool              `gorm:"default:true"`
+	IsActive     bool              `gorm:"default:true"`
+	Images       JSONArrayModel    `gorm:"type:jsonb"`
+	Variants     JSONVariantsModel `gorm:"type:jsonb"`
+	CreatedAt    time.Time         `gorm:"autoCreateTime"`
+	UpdatedAt    time.Time         `gorm:"autoUpdateTime"`
 }
 
 func (ProductModel) TableName() string {
@@ -136,7 +136,7 @@ func (p *ProductModel) ToDomainProduct() *domain.Product {
 	for i, img := range p.Images {
 		images[i] = img
 	}
-	
+
 	variants := make(map[string]interface{})
 	for k, v := range p.Variants {
 		variants[k] = v

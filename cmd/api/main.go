@@ -12,6 +12,7 @@ import (
 	"github.com/exven/pos-system/internal/config"
 	"github.com/exven/pos-system/internal/server"
 	"github.com/exven/pos-system/modules/auth"
+	"github.com/exven/pos-system/modules/outlets"
 	"github.com/exven/pos-system/modules/products"
 	"github.com/exven/pos-system/shared/container"
 	"github.com/exven/pos-system/shared/infrastructure/cache"
@@ -77,6 +78,9 @@ func main() {
 	productsModule := products.NewModule(di, db, eventBus)
 	productsModule.Register()
 
+	outletsModule := outlets.NewModule(di, db, eventBus)
+	outletsModule.Register()
+
 	srv := server.New(cfg, di)
 	log.Println("Server instance created successfully")
 	log.Println("Auth module registered successfully")
@@ -86,7 +90,7 @@ func main() {
 		log.Printf("Server binding to address: :%d", cfg.App.Port)
 		log.Printf("Environment: %s", cfg.App.Env)
 		log.Printf("CORS Origins: %v", cfg.CORS.AllowedOrigins)
-		
+
 		if err := srv.Start(fmt.Sprintf(":%d", cfg.App.Port)); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}

@@ -19,16 +19,16 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 func (r *UserRepository) Create(ctx context.Context, user *domain.User) error {
 	userModel := &UserModel{}
 	userModel.FromDomainUser(user)
-	
+
 	err := r.db.WithContext(ctx).Create(userModel).Error
 	if err != nil {
 		return err
 	}
-	
+
 	user.ID = userModel.ID
 	user.CreatedAt = userModel.CreatedAt
 	user.UpdatedAt = userModel.UpdatedAt
-	
+
 	return nil
 }
 
@@ -48,14 +48,14 @@ func (r *UserRepository) FindByID(ctx context.Context, id uint64) (*domain.User,
 		Preload("Role").
 		Preload("Tenant").
 		First(&userModel, id).Error
-	
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
 		return nil, err
 	}
-	
+
 	return userModel.ToDomainUser(), nil
 }
 
@@ -66,14 +66,14 @@ func (r *UserRepository) FindByUsername(ctx context.Context, tenantID uint64, us
 		Preload("Tenant").
 		Where("tenant_id = ? AND username = ?", tenantID, username).
 		First(&userModel).Error
-	
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
 		return nil, err
 	}
-	
+
 	return userModel.ToDomainUser(), nil
 }
 
@@ -84,14 +84,14 @@ func (r *UserRepository) FindByEmail(ctx context.Context, tenantID uint64, email
 		Preload("Tenant").
 		Where("tenant_id = ? AND email = ?", tenantID, email).
 		First(&userModel).Error
-	
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
 		return nil, err
 	}
-	
+
 	return userModel.ToDomainUser(), nil
 }
 
@@ -103,16 +103,16 @@ func (r *UserRepository) FindAll(ctx context.Context, tenantID uint64, limit, of
 		Limit(limit).
 		Offset(offset).
 		Find(&userModels).Error
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	users := make([]*domain.User, len(userModels))
 	for i, userModel := range userModels {
 		users[i] = userModel.ToDomainUser()
 	}
-	
+
 	return users, nil
 }
 
@@ -123,14 +123,14 @@ func (r *UserRepository) FindByUsernameGlobal(ctx context.Context, username stri
 		Preload("Tenant").
 		Where("username = ?", username).
 		First(&userModel).Error
-	
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
 		return nil, err
 	}
-	
+
 	return userModel.ToDomainUser(), nil
 }
 
@@ -141,14 +141,14 @@ func (r *UserRepository) FindByEmailGlobal(ctx context.Context, email string) (*
 		Preload("Tenant").
 		Where("email = ?", email).
 		First(&userModel).Error
-	
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found")
 		}
 		return nil, err
 	}
-	
+
 	return userModel.ToDomainUser(), nil
 }
 
@@ -158,6 +158,6 @@ func (r *UserRepository) Count(ctx context.Context, tenantID uint64) (int64, err
 		Model(&UserModel{}).
 		Where("tenant_id = ?", tenantID).
 		Count(&count).Error
-	
+
 	return count, err
 }

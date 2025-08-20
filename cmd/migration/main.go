@@ -69,34 +69,34 @@ func runMigrations(db *gorm.DB) error {
 		&database.SubscriptionPlan{},
 		&database.Tenant{},
 		&database.TenantSubscription{},
-		
+
 		// User management and roles
 		&database.Role{},
 		&database.User{},
 		&database.Outlet{},
 		&database.UserOutlet{},
-		
+
 		// Product management
 		&database.ProductCategory{},
 		&database.Product{},
 		&database.ProductStock{},
-		
+
 		// Customer management
 		&database.Customer{},
-		
+
 		// Sales and transactions
 		&database.SalesTransaction{},
 		&database.TransactionItem{},
 		&database.TransactionPayment{},
-		
+
 		// Stock movements and inventory
 		&database.StockMovement{},
-		
+
 		// Archive tables for data retention
 		&database.ArchivedTransaction{},
 		&database.ArchivedTransactionItem{},
 		&database.ArchivedTransactionPayment{},
-		
+
 		// System and audit tables
 		&database.AuditLog{},
 		&database.DataRetentionLog{},

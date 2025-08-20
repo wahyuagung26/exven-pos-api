@@ -32,7 +32,7 @@ type StockMovement struct {
 	CreatedBy     uint64        `gorm:"not null"`
 	CreatedAt     time.Time     `gorm:"autoCreateTime;index:idx_stock_movements_outlet_date"`
 
-	Product   Product `gorm:"foreignKey:ProductID;constraint:OnDelete:CASCADE"`
-	Outlet    Outlet  `gorm:"foreignKey:OutletID;constraint:OnDelete:CASCADE"`
-	CreatedByUser User `gorm:"foreignKey:CreatedBy"`
+	Product       Product `gorm:"foreignKey:ProductID;constraint:OnDelete:CASCADE"`
+	Outlet        Outlet  `gorm:"foreignKey:OutletID;constraint:OnDelete:CASCADE"`
+	CreatedByUser User    `gorm:"foreignKey:CreatedBy"`
 }

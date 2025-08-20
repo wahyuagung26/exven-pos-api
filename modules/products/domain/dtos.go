@@ -20,17 +20,17 @@ type UpdateProductCategoryRequest struct {
 }
 
 type ProductCategoryResponse struct {
-	ID          uint64                     `json:"id"`
-	TenantID    uint64                     `json:"tenant_id"`
-	ParentID    *uint64                    `json:"parent_id"`
-	Name        string                     `json:"name"`
-	Description string                     `json:"description"`
-	ImageURL    string                     `json:"image_url"`
-	SortOrder   int                        `json:"sort_order"`
-	IsActive    bool                       `json:"is_active"`
-	CreatedAt   string                     `json:"created_at"`
-	UpdatedAt   string                     `json:"updated_at"`
-	Parent      *ProductCategoryResponse   `json:"parent,omitempty"`
+	ID            uint64                    `json:"id"`
+	TenantID      uint64                    `json:"tenant_id"`
+	ParentID      *uint64                   `json:"parent_id"`
+	Name          string                    `json:"name"`
+	Description   string                    `json:"description"`
+	ImageURL      string                    `json:"image_url"`
+	SortOrder     int                       `json:"sort_order"`
+	IsActive      bool                      `json:"is_active"`
+	CreatedAt     string                    `json:"created_at"`
+	UpdatedAt     string                    `json:"updated_at"`
+	Parent        *ProductCategoryResponse  `json:"parent,omitempty"`
 	SubCategories []ProductCategoryResponse `json:"sub_categories,omitempty"`
 }
 
@@ -109,4 +109,16 @@ type ProductListResponse struct {
 	Total    int64             `json:"total"`
 	Page     int               `json:"page"`
 	Limit    int               `json:"limit"`
+}
+
+type ProductQuery struct {
+	CategoryID *uint64 `query:"category_id"`
+	SKU        string  `query:"sku"`
+	Barcode    string  `query:"barcode"`
+	Name       string  `query:"name"`
+	IsActive   *bool   `query:"is_active"`
+	Page       int     `query:"page"`
+	Limit      int     `query:"limit"`
+	Sort       string  `query:"sort"`
+	Order      string  `query:"order"`
 }

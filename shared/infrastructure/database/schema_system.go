@@ -43,17 +43,17 @@ const (
 )
 
 type AuditLog struct {
-	ID         uint64    `gorm:"primaryKey;autoIncrement"`
-	TenantID   uint64    `gorm:"not null;index:idx_audit_logs_tenant_date"`
-	UserID     *uint64   `gorm:"index:idx_audit_logs_user_date;constraint:OnDelete:SET NULL"`
-	Action     string    `gorm:"size:100;not null"`
-	TableName  string    `gorm:"size:100;index:idx_audit_logs_table_record"`
-	RecordID   *uint64   `gorm:"index:idx_audit_logs_table_record"`
-	OldValues  JSONMap   `gorm:"type:jsonb"`
-	NewValues  JSONMap   `gorm:"type:jsonb"`
-	IPAddress  net.IP    `gorm:"type:inet"`
-	UserAgent  string    `gorm:"type:text"`
-	CreatedAt  time.Time `gorm:"autoCreateTime;index:idx_audit_logs_tenant_date;index:idx_audit_logs_user_date"`
+	ID        uint64    `gorm:"primaryKey;autoIncrement"`
+	TenantID  uint64    `gorm:"not null;index:idx_audit_logs_tenant_date"`
+	UserID    *uint64   `gorm:"index:idx_audit_logs_user_date;constraint:OnDelete:SET NULL"`
+	Action    string    `gorm:"size:100;not null"`
+	TableName string    `gorm:"size:100;index:idx_audit_logs_table_record"`
+	RecordID  *uint64   `gorm:"index:idx_audit_logs_table_record"`
+	OldValues JSONMap   `gorm:"type:jsonb"`
+	NewValues JSONMap   `gorm:"type:jsonb"`
+	IPAddress net.IP    `gorm:"type:inet"`
+	UserAgent string    `gorm:"type:text"`
+	CreatedAt time.Time `gorm:"autoCreateTime;index:idx_audit_logs_tenant_date;index:idx_audit_logs_user_date"`
 
 	Tenant Tenant `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
 	User   *User  `gorm:"foreignKey:UserID;constraint:OnDelete:SET NULL"`

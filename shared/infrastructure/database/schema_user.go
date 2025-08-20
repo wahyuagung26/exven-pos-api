@@ -50,32 +50,32 @@ func (j *JSONSettings) Scan(value interface{}) error {
 }
 
 type Role struct {
-	ID          uint64    `gorm:"primaryKey;autoIncrement"`
-	Name        string    `gorm:"size:50;uniqueIndex;not null"`
-	DisplayName string    `gorm:"size:100;not null"`
-	Description string    `gorm:"type:text"`
+	ID          uint64          `gorm:"primaryKey;autoIncrement"`
+	Name        string          `gorm:"size:50;uniqueIndex;not null"`
+	DisplayName string          `gorm:"size:100;not null"`
+	Description string          `gorm:"type:text"`
 	Permissions JSONPermissions `gorm:"type:jsonb"`
-	IsSystem    bool      `gorm:"default:false"`
-	CreatedAt   time.Time `gorm:"autoCreateTime"`
+	IsSystem    bool            `gorm:"default:false"`
+	CreatedAt   time.Time       `gorm:"autoCreateTime"`
 
 	Users []User `gorm:"foreignKey:RoleID"`
 }
 
 type User struct {
-	ID               uint64     `gorm:"primaryKey;autoIncrement"`
-	TenantID         uint64     `gorm:"not null;uniqueIndex:idx_tenant_username;uniqueIndex:idx_tenant_email;index:idx_tenant_active"`
-	RoleID           uint64     `gorm:"not null"`
-	Username         string     `gorm:"size:100;not null;uniqueIndex:idx_tenant_username"`
-	Email            string     `gorm:"size:255;not null;uniqueIndex:idx_tenant_email"`
-	PasswordHash     string     `gorm:"size:255;not null"`
-	FullName         string     `gorm:"size:255;not null"`
-	Phone            string     `gorm:"size:20"`
-	AvatarURL        string     `gorm:"size:500"`
-	IsActive         bool       `gorm:"default:true;index:idx_tenant_active"`
-	LastLoginAt      *time.Time
-	EmailVerifiedAt  *time.Time
-	CreatedAt        time.Time `gorm:"autoCreateTime"`
-	UpdatedAt        time.Time `gorm:"autoUpdateTime"`
+	ID              uint64 `gorm:"primaryKey;autoIncrement"`
+	TenantID        uint64 `gorm:"not null;uniqueIndex:idx_tenant_username;uniqueIndex:idx_tenant_email;index:idx_tenant_active"`
+	RoleID          uint64 `gorm:"not null"`
+	Username        string `gorm:"size:100;not null;uniqueIndex:idx_tenant_username"`
+	Email           string `gorm:"size:255;not null;uniqueIndex:idx_tenant_email"`
+	PasswordHash    string `gorm:"size:255;not null"`
+	FullName        string `gorm:"size:255;not null"`
+	Phone           string `gorm:"size:20"`
+	AvatarURL       string `gorm:"size:500"`
+	IsActive        bool   `gorm:"default:true;index:idx_tenant_active"`
+	LastLoginAt     *time.Time
+	EmailVerifiedAt *time.Time
+	CreatedAt       time.Time `gorm:"autoCreateTime"`
+	UpdatedAt       time.Time `gorm:"autoUpdateTime"`
 
 	Tenant      Tenant       `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
 	Role        Role         `gorm:"foreignKey:RoleID"`
@@ -83,22 +83,22 @@ type User struct {
 }
 
 type Outlet struct {
-	ID          uint64    `gorm:"primaryKey;autoIncrement"`
-	TenantID    uint64    `gorm:"not null;uniqueIndex:idx_tenant_code;index:idx_tenant_outlet_active"`
-	Name        string    `gorm:"size:255;not null"`
-	Code        string    `gorm:"size:50;not null;uniqueIndex:idx_tenant_code"`
-	Description string    `gorm:"type:text"`
-	Address     string    `gorm:"type:text"`
-	City        string    `gorm:"size:100"`
-	Province    string    `gorm:"size:100"`
-	PostalCode  string    `gorm:"size:10"`
-	Phone       string    `gorm:"size:20"`
-	Email       string    `gorm:"size:255"`
+	ID          uint64 `gorm:"primaryKey;autoIncrement"`
+	TenantID    uint64 `gorm:"not null;uniqueIndex:idx_tenant_code;index:idx_tenant_outlet_active"`
+	Name        string `gorm:"size:255;not null"`
+	Code        string `gorm:"size:50;not null;uniqueIndex:idx_tenant_code"`
+	Description string `gorm:"type:text"`
+	Address     string `gorm:"type:text"`
+	City        string `gorm:"size:100"`
+	Province    string `gorm:"size:100"`
+	PostalCode  string `gorm:"size:10"`
+	Phone       string `gorm:"size:20"`
+	Email       string `gorm:"size:255"`
 	ManagerID   *uint64
-	IsActive    bool      `gorm:"default:true;index:idx_tenant_outlet_active"`
+	IsActive    bool         `gorm:"default:true;index:idx_tenant_outlet_active"`
 	Settings    JSONSettings `gorm:"type:jsonb"`
-	CreatedAt   time.Time `gorm:"autoCreateTime"`
-	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
+	CreatedAt   time.Time    `gorm:"autoCreateTime"`
+	UpdatedAt   time.Time    `gorm:"autoUpdateTime"`
 
 	Tenant      Tenant       `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
 	Manager     *User        `gorm:"foreignKey:ManagerID;constraint:OnDelete:SET NULL"`

@@ -31,7 +31,7 @@ func NewRedisClient(config Config) (*RedisClient, error) {
 	})
 
 	ctx := context.Background()
-	
+
 	if err := client.Ping(ctx).Err(); err != nil {
 		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}
@@ -47,7 +47,7 @@ func (r *RedisClient) Set(key string, value interface{}, expiration time.Duratio
 	if err != nil {
 		return fmt.Errorf("failed to marshal value: %w", err)
 	}
-	
+
 	return r.client.Set(r.ctx, key, data, expiration).Err()
 }
 
@@ -59,11 +59,11 @@ func (r *RedisClient) Get(key string, dest interface{}) error {
 		}
 		return fmt.Errorf("failed to get value: %w", err)
 	}
-	
+
 	if err := json.Unmarshal([]byte(data), dest); err != nil {
 		return fmt.Errorf("failed to unmarshal value: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -84,7 +84,7 @@ func (r *RedisClient) SetNX(key string, value interface{}, expiration time.Durat
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal value: %w", err)
 	}
-	
+
 	return r.client.SetNX(r.ctx, key, data, expiration).Result()
 }
 

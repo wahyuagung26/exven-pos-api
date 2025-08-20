@@ -33,6 +33,6 @@ type Customer struct {
 	CreatedAt     time.Time `gorm:"autoCreateTime"`
 	UpdatedAt     time.Time `gorm:"autoUpdateTime"`
 
-	Tenant       Tenant        `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
+	Tenant       Tenant             `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
 	Transactions []SalesTransaction `gorm:"foreignKey:CustomerID"`
 }

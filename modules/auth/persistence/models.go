@@ -8,20 +8,20 @@ import (
 
 // UserModel maps to the database users table
 type UserModel struct {
-	ID               uint64     `gorm:"primaryKey;autoIncrement"`
-	TenantID         uint64     `gorm:"not null;uniqueIndex:idx_tenant_username;uniqueIndex:idx_tenant_email;index:idx_tenant_active"`
-	RoleID           uint64     `gorm:"not null"`
-	Username         string     `gorm:"size:100;not null;uniqueIndex:idx_tenant_username"`
-	Email            string     `gorm:"size:255;not null;uniqueIndex:idx_tenant_email"`
-	PasswordHash     string     `gorm:"size:255;not null"`
-	FullName         string     `gorm:"size:255;not null"`
-	Phone            string     `gorm:"size:20"`
-	AvatarURL        string     `gorm:"size:500"`
-	IsActive         bool       `gorm:"default:true;index:idx_tenant_active"`
-	LastLoginAt      *time.Time
-	EmailVerifiedAt  *time.Time
-	CreatedAt        time.Time `gorm:"autoCreateTime"`
-	UpdatedAt        time.Time `gorm:"autoUpdateTime"`
+	ID              uint64 `gorm:"primaryKey;autoIncrement"`
+	TenantID        uint64 `gorm:"not null;uniqueIndex:idx_tenant_username;uniqueIndex:idx_tenant_email;index:idx_tenant_active"`
+	RoleID          uint64 `gorm:"not null"`
+	Username        string `gorm:"size:100;not null;uniqueIndex:idx_tenant_username"`
+	Email           string `gorm:"size:255;not null;uniqueIndex:idx_tenant_email"`
+	PasswordHash    string `gorm:"size:255;not null"`
+	FullName        string `gorm:"size:255;not null"`
+	Phone           string `gorm:"size:20"`
+	AvatarURL       string `gorm:"size:500"`
+	IsActive        bool   `gorm:"default:true;index:idx_tenant_active"`
+	LastLoginAt     *time.Time
+	EmailVerifiedAt *time.Time
+	CreatedAt       time.Time `gorm:"autoCreateTime"`
+	UpdatedAt       time.Time `gorm:"autoUpdateTime"`
 
 	Role   RoleModel   `gorm:"foreignKey:RoleID"`
 	Tenant TenantModel `gorm:"foreignKey:TenantID;constraint:OnDelete:CASCADE"`
@@ -48,12 +48,12 @@ func (RoleModel) TableName() string {
 
 // TenantModel maps to the database tenants table
 type TenantModel struct {
-	ID           uint64     `gorm:"primaryKey;autoIncrement"`
-	Name         string     `gorm:"size:255;not null"`
-	BusinessType string     `gorm:"size:100"`
-	Email        string     `gorm:"size:255;uniqueIndex;not null"`
-	Phone        string     `gorm:"size:20"`
-	IsActive     bool       `gorm:"default:true;index"`
+	ID           uint64 `gorm:"primaryKey;autoIncrement"`
+	Name         string `gorm:"size:255;not null"`
+	BusinessType string `gorm:"size:100"`
+	Email        string `gorm:"size:255;uniqueIndex;not null"`
+	Phone        string `gorm:"size:20"`
+	IsActive     bool   `gorm:"default:true;index"`
 	TrialEndsAt  *time.Time
 	CreatedAt    time.Time `gorm:"autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"autoUpdateTime"`
