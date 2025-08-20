@@ -10,6 +10,8 @@ import (
 	"github.com/exven/pos-system/modules/auth/handlers"
 	"github.com/exven/pos-system/modules/outlets"
 	"github.com/exven/pos-system/modules/products"
+	"github.com/exven/pos-system/modules/roles"
+	"github.com/exven/pos-system/modules/subscription_plans"
 	"github.com/exven/pos-system/shared/container"
 	"github.com/exven/pos-system/shared/middleware"
 	"github.com/exven/pos-system/shared/validator"
@@ -99,6 +101,16 @@ func (s *Server) registerRoutes() {
 	outletsModule := outlets.NewModule(s.container, db, nil)
 	outletHandler := outletsModule.GetHandler()
 	outletHandler.RegisterRoutes(protected)
+
+	// Get the subscription plans module and register its routes (no auth required)
+	subscriptionPlansModule := subscription_plans.NewModule(s.container, db, nil)
+	subscriptionPlanHandler := subscriptionPlansModule.GetHandler()
+	subscriptionPlanHandler.RegisterRoutes(api)
+
+	// Get the roles module and register its routes (no auth required)
+	rolesModule := roles.NewModule(s.container, db, nil)
+	roleHandler := rolesModule.GetHandler()
+	roleHandler.RegisterRoutes(api)
 
 }
 

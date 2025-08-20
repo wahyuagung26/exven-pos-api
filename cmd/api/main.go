@@ -14,6 +14,8 @@ import (
 	"github.com/exven/pos-system/modules/auth"
 	"github.com/exven/pos-system/modules/outlets"
 	"github.com/exven/pos-system/modules/products"
+	"github.com/exven/pos-system/modules/roles"
+	"github.com/exven/pos-system/modules/subscription_plans"
 	"github.com/exven/pos-system/shared/container"
 	"github.com/exven/pos-system/shared/infrastructure/cache"
 	"github.com/exven/pos-system/shared/infrastructure/database"
@@ -80,6 +82,12 @@ func main() {
 
 	outletsModule := outlets.NewModule(di, db, eventBus)
 	outletsModule.Register()
+
+	subscriptionPlansModule := subscription_plans.NewModule(di, db, eventBus)
+	subscriptionPlansModule.Register()
+
+	rolesModule := roles.NewModule(di, db, eventBus)
+	rolesModule.Register()
 
 	srv := server.New(cfg, di)
 	log.Println("Server instance created successfully")
