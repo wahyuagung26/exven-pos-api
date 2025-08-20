@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -161,9 +162,9 @@ func Load() (*Config, error) {
 			RefreshExpiryDays: viper.GetInt("JWT_REFRESH_EXPIRY_DAYS"),
 		},
 		CORS: CORSConfig{
-			AllowedOrigins: viper.GetStringSlice("CORS_ALLOWED_ORIGINS"),
-			AllowedMethods: viper.GetStringSlice("CORS_ALLOWED_METHODS"),
-			AllowedHeaders: viper.GetStringSlice("CORS_ALLOWED_HEADERS"),
+			AllowedOrigins: parseCORSString(viper.GetString("CORS_ALLOWED_ORIGINS")),
+			AllowedMethods: parseCORSString(viper.GetString("CORS_ALLOWED_METHODS")),
+			AllowedHeaders: parseCORSString(viper.GetString("CORS_ALLOWED_HEADERS")),
 		},
 		RateLimit: RateLimitConfig{
 			RequestsPerMinute: viper.GetInt("RATE_LIMIT_REQUESTS_PER_MINUTE"),
@@ -183,4 +184,15 @@ func Load() (*Config, error) {
 	}
 
 	return config, nil
+}
+
+func parseCORSString(value string) []string {
+	if value == "" {
+		return []string{}
+	}
+	parts := strings.Split(value, ",")
+	for i, part := range parts {
+		parts[i] = strings.TrimSpace(part)
+	}
+	return parts
 }

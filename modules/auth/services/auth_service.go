@@ -11,11 +11,11 @@ import (
 )
 
 type AuthService struct {
-	userRepo     domain.UserRepository
-	sessionRepo  domain.SessionRepository
-	tokenService domain.TokenService
+	userRepo        domain.UserRepository
+	sessionRepo     domain.SessionRepository
+	tokenService    domain.TokenService
 	passwordService domain.PasswordService
-	eventBus     messaging.EventBus
+	eventBus        messaging.EventBus
 }
 
 func NewAuthService(
@@ -26,18 +26,23 @@ func NewAuthService(
 	eventBus messaging.EventBus,
 ) *AuthService {
 	return &AuthService{
-		userRepo:     userRepo,
-		sessionRepo:  sessionRepo,
-		tokenService: tokenService,
+		userRepo:        userRepo,
+		sessionRepo:     sessionRepo,
+		tokenService:    tokenService,
 		passwordService: passwordService,
-		eventBus:     eventBus,
+		eventBus:        eventBus,
 	}
 }
 
 func (s *AuthService) Login(ctx context.Context, credentials domain.LoginCredentials) (*domain.TokenPair, *domain.User, error) {
-	user, err := s.userRepo.FindByUsername(ctx, credentials.TenantID, credentials.Username)
+	// Try to find user by username first (globally across all tenants)
+	user, err := s.userRepo.FindByUsernameGlobal(ctx, credentials.Username)
 	if err != nil {
-		return nil, nil, fmt.Errorf("invalid credentials")
+		// If username not found, try by email
+		user, err = s.userRepo.FindByEmailGlobal(ctx, credentials.Username)
+		if err != nil {
+			return nil, nil, fmt.Errorf("invalid credentials")
+		}
 	}
 
 	if !user.IsActive {
@@ -82,7 +87,13 @@ func (s *AuthService) Login(ctx context.Context, credentials domain.LoginCredent
 		"username": user.Username,
 		"ip":       ctx.Value("ip"),
 	})
-	s.eventBus.Publish(ctx, "auth.login", event)
+
+	fmt.Printf("Publishing login event, eventBus is nil: %t\n", s.eventBus == nil)
+	if s.eventBus != nil {
+		s.eventBus.Publish(ctx, "auth.login", event)
+	} else {
+		fmt.Printf("Skipping event publishing as eventBus is nil\n")
+	}
 
 	return &domain.TokenPair{
 		AccessToken:  accessToken,
@@ -98,13 +109,13 @@ func (s *AuthService) Register(ctx context.Context, req domain.RegisterRequest) 
 	}
 
 	user := &domain.User{
-		Username:     req.Username,
-		Email:        req.Email,
-		FullName:     req.FullName,
-		Phone:        req.Phone,
-		IsActive:     true,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
+		Username:  req.Username,
+		Email:     req.Email,
+		FullName:  req.FullName,
+		Phone:     req.Phone,
+		IsActive:  true,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	user.PasswordHash = hashedPassword
@@ -212,8 +223,8 @@ func (s *AuthService) ChangePassword(ctx context.Context, userID uint64, oldPass
 	return nil
 }
 
-func (s *AuthService) ResetPassword(ctx context.Context, email string, tenantID uint64) error {
-	user, err := s.userRepo.FindByEmail(ctx, tenantID, email)
+func (s *AuthService) ResetPassword(ctx context.Context, email string) error {
+	user, err := s.userRepo.FindByEmailGlobal(ctx, email)
 	if err != nil {
 		return fmt.Errorf("user not found")
 	}

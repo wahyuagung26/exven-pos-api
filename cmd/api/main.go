@@ -74,9 +74,15 @@ func main() {
 	authModule.Register()
 
 	srv := server.New(cfg, di)
+	log.Println("Server instance created successfully")
+	log.Println("Auth module registered successfully")
 
 	go func() {
 		log.Printf("Starting server on port %d", cfg.App.Port)
+		log.Printf("Server binding to address: :%d", cfg.App.Port)
+		log.Printf("Environment: %s", cfg.App.Env)
+		log.Printf("CORS Origins: %v", cfg.CORS.AllowedOrigins)
+		
 		if err := srv.Start(fmt.Sprintf(":%d", cfg.App.Port)); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}

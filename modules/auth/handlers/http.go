@@ -45,7 +45,6 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	credentials := domain.LoginCredentials{
 		Username: req.Username,
 		Password: req.Password,
-		TenantID: req.TenantID,
 	}
 
 	tokenPair, user, err := h.authService.Login(c.Request().Context(), credentials)
@@ -203,7 +202,7 @@ func (h *AuthHandler) ResetPassword(c echo.Context) error {
 		})
 	}
 
-	if err := h.authService.ResetPassword(c.Request().Context(), req.Email, req.TenantID); err != nil {
+	if err := h.authService.ResetPassword(c.Request().Context(), req.Email); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
 		})

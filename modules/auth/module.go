@@ -2,7 +2,6 @@ package auth
 
 import (
 	"github.com/exven/pos-system/internal/config"
-	"github.com/exven/pos-system/modules/auth/domain"
 	"github.com/exven/pos-system/modules/auth/persistence"
 	"github.com/exven/pos-system/modules/auth/services"
 	"github.com/exven/pos-system/shared/container"
@@ -57,10 +56,14 @@ func (m *Module) Register() {
 	})
 
 	m.container.RegisterSingleton("auth.service", func() interface{} {
-		userRepo := m.container.MustGet("auth.userRepository").(domain.UserRepository)
-		sessionRepo := m.container.MustGet("auth.sessionRepository").(domain.SessionRepository)
-		tokenService := m.container.MustGet("auth.tokenService").(domain.TokenService)
-		passwordService := m.container.MustGet("auth.passwordService").(domain.PasswordService)
+		userRepo := persistence.NewUserRepository(m.db)
+		sessionRepo := persistence.NewSessionRepository()
+		tokenService := services.NewTokenService(
+			m.jwtConfig.Secret,
+			m.jwtConfig.ExpiryHours,
+			m.jwtConfig.RefreshExpiryDays,
+		)
+		passwordService := services.NewPasswordService()
 
 		return services.NewAuthService(
 			userRepo,

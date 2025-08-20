@@ -10,6 +10,7 @@ import (
 	"github.com/exven/pos-system/modules/auth/handlers"
 	"github.com/exven/pos-system/shared/container"
 	"github.com/exven/pos-system/shared/middleware"
+	"github.com/exven/pos-system/shared/validator"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 )
@@ -26,8 +27,20 @@ func New(cfg *config.Config, container container.Container) *Server {
 	e.HideBanner = true
 	e.HidePort = true
 
-	e.Use(echoMiddleware.Logger())
-	e.Use(echoMiddleware.Recover())
+	// Set custom validator
+	e.Validator = validator.New()
+
+	// Enable detailed request logging
+	e.Use(echoMiddleware.LoggerWithConfig(echoMiddleware.LoggerConfig{
+		Format: "method=${method}, uri=${uri}, status=${status}, error=${error}, latency=${latency_human}\n",
+	}))
+	
+	// Enable panic recovery with detailed stack traces
+	e.Use(echoMiddleware.RecoverWithConfig(echoMiddleware.RecoverConfig{
+		StackSize: 1 << 10, // 1 KB
+		LogLevel:  1,       // DEBUG level
+	}))
+	
 	e.Use(echoMiddleware.RequestID())
 
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{

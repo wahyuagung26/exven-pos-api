@@ -11,6 +11,8 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id uint64) (*User, error)
 	FindByUsername(ctx context.Context, tenantID uint64, username string) (*User, error)
 	FindByEmail(ctx context.Context, tenantID uint64, email string) (*User, error)
+	FindByUsernameGlobal(ctx context.Context, username string) (*User, error)
+	FindByEmailGlobal(ctx context.Context, email string) (*User, error)
 	FindAll(ctx context.Context, tenantID uint64, limit, offset int) ([]*User, error)
 	Count(ctx context.Context, tenantID uint64) (int64, error)
 }
@@ -31,7 +33,7 @@ type AuthService interface {
 	Logout(ctx context.Context, userID uint64) error
 	ValidateToken(ctx context.Context, token string) (*User, error)
 	ChangePassword(ctx context.Context, userID uint64, oldPassword, newPassword string) error
-	ResetPassword(ctx context.Context, email string, tenantID uint64) error
+	ResetPassword(ctx context.Context, email string) error
 	VerifyEmail(ctx context.Context, token string) error
 }
 

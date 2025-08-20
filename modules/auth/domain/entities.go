@@ -59,7 +59,6 @@ type Session struct {
 type LoginCredentials struct {
 	Username string
 	Password string
-	TenantID uint64
 }
 
 type TokenPair struct {

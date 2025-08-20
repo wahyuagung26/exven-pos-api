@@ -116,6 +116,42 @@ func (r *UserRepository) FindAll(ctx context.Context, tenantID uint64, limit, of
 	return users, nil
 }
 
+func (r *UserRepository) FindByUsernameGlobal(ctx context.Context, username string) (*domain.User, error) {
+	var userModel UserModel
+	err := r.db.WithContext(ctx).
+		Preload("Role").
+		Preload("Tenant").
+		Where("username = ?", username).
+		First(&userModel).Error
+	
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, err
+	}
+	
+	return userModel.ToDomainUser(), nil
+}
+
+func (r *UserRepository) FindByEmailGlobal(ctx context.Context, email string) (*domain.User, error) {
+	var userModel UserModel
+	err := r.db.WithContext(ctx).
+		Preload("Role").
+		Preload("Tenant").
+		Where("email = ?", email).
+		First(&userModel).Error
+	
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, err
+	}
+	
+	return userModel.ToDomainUser(), nil
+}
+
 func (r *UserRepository) Count(ctx context.Context, tenantID uint64) (int64, error) {
 	var count int64
 	err := r.db.WithContext(ctx).

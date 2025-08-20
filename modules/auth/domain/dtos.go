@@ -3,7 +3,6 @@ package domain
 type LoginRequest struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
-	TenantID uint64 `json:"tenant_id" validate:"required"`
 }
 
 type LoginResponse struct {
@@ -57,8 +56,7 @@ type ChangePasswordRequest struct {
 }
 
 type ResetPasswordRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	TenantID uint64 `json:"tenant_id" validate:"required"`
+	Email string `json:"email" validate:"required,email"`
 }
 
 type VerifyEmailRequest struct {
