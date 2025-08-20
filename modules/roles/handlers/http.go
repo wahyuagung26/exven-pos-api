@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/exven/pos-system/modules/roles/domain"
+	"github.com/exven/pos-system/shared/utils/response"
 	"github.com/labstack/echo/v4"
 )
 
@@ -49,9 +49,7 @@ func (h *RoleHandler) GetRoles(c echo.Context) error {
 
 	roles, total, err := h.service.GetAll(c.Request().Context(), limit, offset)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get roles",
-		})
+		return response.InternalError(c, "Failed to get roles")
 	}
 
 	roleResponses := make([]domain.RoleResponse, len(roles))
@@ -59,33 +57,22 @@ func (h *RoleHandler) GetRoles(c echo.Context) error {
 		roleResponses[i] = h.roleToResponse(role)
 	}
 
-	response := domain.RoleListResponse{
-		Roles: roleResponses,
-		Total: total,
-		Page:  page,
-		Limit: limit,
-	}
-
-	return c.JSON(http.StatusOK, response)
+	return response.SuccessWithPagination(c, "Roles retrieved successfully", roleResponses, page, limit, int(total))
 }
 
 func (h *RoleHandler) GetRole(c echo.Context) error {
 	roleID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid role ID",
-		})
+		return response.BadRequest(c, "Invalid role ID")
 	}
 
 	role, err := h.service.GetByID(c.Request().Context(), roleID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error": "Role not found",
-		})
+		return response.NotFound(c, "Role not found")
 	}
 
-	response := h.roleToResponse(role)
-	return c.JSON(http.StatusOK, response)
+	roleResponse := h.roleToResponse(role)
+	return response.Success(c, "Role retrieved successfully", roleResponse)
 }
 
 func (h *RoleHandler) GetRoleByName(c echo.Context) error {
@@ -93,21 +80,17 @@ func (h *RoleHandler) GetRoleByName(c echo.Context) error {
 
 	role, err := h.service.GetByName(c.Request().Context(), roleName)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error": "Role not found",
-		})
+		return response.NotFound(c, "Role not found")
 	}
 
-	response := h.roleToResponse(role)
-	return c.JSON(http.StatusOK, response)
+	roleResponse := h.roleToResponse(role)
+	return response.Success(c, "Role retrieved successfully", roleResponse)
 }
 
 func (h *RoleHandler) GetSystemRoles(c echo.Context) error {
 	roles, err := h.service.GetSystemRoles(c.Request().Context())
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get system roles",
-		})
+		return response.InternalError(c, "Failed to get system roles")
 	}
 
 	roleResponses := make([]domain.RoleResponse, len(roles))
@@ -115,10 +98,7 @@ func (h *RoleHandler) GetSystemRoles(c echo.Context) error {
 		roleResponses[i] = h.roleToResponse(role)
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"roles": roleResponses,
-		"total": len(roleResponses),
-	})
+	return response.Success(c, "System roles retrieved successfully", roleResponses)
 }
 
 func (h *RoleHandler) roleToResponse(role *domain.Role) domain.RoleResponse {

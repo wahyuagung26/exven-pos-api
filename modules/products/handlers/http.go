@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/exven/pos-system/modules/products/domain"
+	"github.com/exven/pos-system/shared/utils/response"
 	"github.com/labstack/echo/v4"
 )
 
@@ -49,14 +49,12 @@ func (h *ProductHandler) RegisterRoutes(e *echo.Group) {
 func (h *ProductHandler) CreateProduct(c echo.Context) error {
 	var req domain.CreateProductRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
+		return response.ValidationError(c, map[string][]string{
+			"request": {err.Error()},
 		})
 	}
 
@@ -64,13 +62,11 @@ func (h *ProductHandler) CreateProduct(c echo.Context) error {
 
 	product, err := h.productService.Create(c.Request().Context(), tenantID, req)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	response := h.productToResponse(product)
-	return c.JSON(http.StatusCreated, response)
+	productResponse := h.productToResponse(product)
+	return response.Created(c, "Product created successfully", productResponse)
 }
 
 func (h *ProductHandler) GetProducts(c echo.Context) error {
@@ -96,9 +92,7 @@ func (h *ProductHandler) GetProducts(c echo.Context) error {
 
 	products, total, err := h.productService.GetAll(c.Request().Context(), tenantID, limit, offset)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get products",
-		})
+		return response.InternalError(c, "Failed to get products")
 	}
 
 	productResponses := make([]domain.ProductResponse, len(products))
@@ -106,14 +100,7 @@ func (h *ProductHandler) GetProducts(c echo.Context) error {
 		productResponses[i] = h.productToResponse(product)
 	}
 
-	response := domain.ProductListResponse{
-		Products: productResponses,
-		Total:    total,
-		Page:     page,
-		Limit:    limit,
-	}
-
-	return c.JSON(http.StatusOK, response)
+	return response.SuccessWithPagination(c, "Products retrieved successfully", productResponses, page, limit, int(total))
 }
 
 func (h *ProductHandler) GetProduct(c echo.Context) error {
@@ -121,33 +108,27 @@ func (h *ProductHandler) GetProduct(c echo.Context) error {
 
 	productID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid product ID",
-		})
+		return response.BadRequest(c, "Invalid product ID")
 	}
 
 	product, err := h.productService.GetByID(c.Request().Context(), tenantID, productID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error": "Product not found",
-		})
+		return response.NotFound(c, "Product not found")
 	}
 
-	response := h.productToResponse(product)
-	return c.JSON(http.StatusOK, response)
+	productResponse := h.productToResponse(product)
+	return response.Success(c, "Product retrieved successfully", productResponse)
 }
 
 func (h *ProductHandler) UpdateProduct(c echo.Context) error {
 	var req domain.UpdateProductRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
+		return response.ValidationError(c, map[string][]string{
+			"request": {err.Error()},
 		})
 	}
 
@@ -155,20 +136,16 @@ func (h *ProductHandler) UpdateProduct(c echo.Context) error {
 
 	productID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid product ID",
-		})
+		return response.BadRequest(c, "Invalid product ID")
 	}
 
 	product, err := h.productService.Update(c.Request().Context(), tenantID, productID, req)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	response := h.productToResponse(product)
-	return c.JSON(http.StatusOK, response)
+	productResponse := h.productToResponse(product)
+	return response.Success(c, "Product updated successfully", productResponse)
 }
 
 func (h *ProductHandler) DeleteProduct(c echo.Context) error {
@@ -176,21 +153,15 @@ func (h *ProductHandler) DeleteProduct(c echo.Context) error {
 
 	productID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid product ID",
-		})
+		return response.BadRequest(c, "Invalid product ID")
 	}
 
 	err = h.productService.Delete(c.Request().Context(), tenantID, productID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Product deleted successfully",
-	})
+	return response.Success(c, "Product deleted successfully", nil)
 }
 
 func (h *ProductHandler) GetProductBySKU(c echo.Context) error {
@@ -199,13 +170,11 @@ func (h *ProductHandler) GetProductBySKU(c echo.Context) error {
 
 	product, err := h.productService.GetBySKU(c.Request().Context(), tenantID, sku)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error": "Product not found",
-		})
+		return response.NotFound(c, "Product not found")
 	}
 
-	response := h.productToResponse(product)
-	return c.JSON(http.StatusOK, response)
+	productResponse := h.productToResponse(product)
+	return response.Success(c, "Product retrieved successfully", productResponse)
 }
 
 func (h *ProductHandler) GetProductByBarcode(c echo.Context) error {
@@ -214,13 +183,11 @@ func (h *ProductHandler) GetProductByBarcode(c echo.Context) error {
 
 	product, err := h.productService.GetByBarcode(c.Request().Context(), tenantID, barcode)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error": "Product not found",
-		})
+		return response.NotFound(c, "Product not found")
 	}
 
-	response := h.productToResponse(product)
-	return c.JSON(http.StatusOK, response)
+	productResponse := h.productToResponse(product)
+	return response.Success(c, "Product retrieved successfully", productResponse)
 }
 
 func (h *ProductHandler) GetProductsByCategory(c echo.Context) error {
@@ -228,9 +195,7 @@ func (h *ProductHandler) GetProductsByCategory(c echo.Context) error {
 
 	categoryID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid category ID",
-		})
+		return response.BadRequest(c, "Invalid category ID")
 	}
 
 	// Parse pagination parameters
@@ -253,9 +218,7 @@ func (h *ProductHandler) GetProductsByCategory(c echo.Context) error {
 
 	products, total, err := h.productService.GetByCategory(c.Request().Context(), tenantID, categoryID, limit, offset)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
 	productResponses := make([]domain.ProductResponse, len(products))
@@ -263,14 +226,7 @@ func (h *ProductHandler) GetProductsByCategory(c echo.Context) error {
 		productResponses[i] = h.productToResponse(product)
 	}
 
-	response := domain.ProductListResponse{
-		Products: productResponses,
-		Total:    total,
-		Page:     page,
-		Limit:    limit,
-	}
-
-	return c.JSON(http.StatusOK, response)
+	return response.SuccessWithPagination(c, "Products retrieved successfully", productResponses, page, limit, int(total))
 }
 
 // Product Category handlers
@@ -278,28 +234,22 @@ func (h *ProductHandler) GetProductsByCategory(c echo.Context) error {
 func (h *ProductHandler) CreateCategory(c echo.Context) error {
 	var req domain.CreateProductCategoryRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
 	tenantID := c.Get("tenant_id").(uint64)
 
 	category, err := h.categoryService.Create(c.Request().Context(), tenantID, req)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	response := h.categoryToResponse(category)
-	return c.JSON(http.StatusCreated, response)
+	categoryResponse := h.categoryToResponse(category)
+	return response.Created(c, "Category created successfully", categoryResponse)
 }
 
 func (h *ProductHandler) GetCategories(c echo.Context) error {
@@ -340,9 +290,7 @@ func (h *ProductHandler) GetCategories(c echo.Context) error {
 
 	categories, total, err := h.categoryService.GetAll(c.Request().Context(), tenantID, query)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get categories",
-		})
+		return response.InternalError(c, "Failed to get categories")
 	}
 
 	categoryResponses := make([]domain.ProductCategoryResponse, len(categories))
@@ -350,14 +298,7 @@ func (h *ProductHandler) GetCategories(c echo.Context) error {
 		categoryResponses[i] = h.categoryToResponse(category)
 	}
 
-	response := domain.ProductCategoryListResponse{
-		Categories: categoryResponses,
-		Total:      total,
-		Page:       query.Page,
-		Limit:      query.Limit,
-	}
-
-	return c.JSON(http.StatusOK, response)
+	return response.SuccessWithPagination(c, "Categories retrieved successfully", categoryResponses, query.Page, query.Limit, int(total))
 }
 
 func (h *ProductHandler) GetCategory(c echo.Context) error {
@@ -365,19 +306,15 @@ func (h *ProductHandler) GetCategory(c echo.Context) error {
 
 	categoryID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid category ID",
-		})
+		return response.BadRequest(c, "Invalid category ID")
 	}
 
 	category, err := h.categoryService.GetByID(c.Request().Context(), tenantID, categoryID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error": "Category not found",
-		})
+		return response.NotFound(c, "Category not found")
 	}
 
-	response := h.categoryToResponse(category)
+	categoryResponse := h.categoryToResponse(category)
 
 	// Include subcategories if they exist
 	if len(category.SubCategories) > 0 {
@@ -385,44 +322,36 @@ func (h *ProductHandler) GetCategory(c echo.Context) error {
 		for i, subCategory := range category.SubCategories {
 			subCategoryResponses[i] = h.categoryToResponse(subCategory)
 		}
-		response.SubCategories = subCategoryResponses
+		categoryResponse.SubCategories = subCategoryResponses
 	}
 
-	return c.JSON(http.StatusOK, response)
+	return response.Success(c, "Category retrieved successfully", categoryResponse)
 }
 
 func (h *ProductHandler) UpdateCategory(c echo.Context) error {
 	var req domain.UpdateProductCategoryRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
 	tenantID := c.Get("tenant_id").(uint64)
 
 	categoryID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid category ID",
-		})
+		return response.BadRequest(c, "Invalid category ID")
 	}
 
 	category, err := h.categoryService.Update(c.Request().Context(), tenantID, categoryID, req)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	response := h.categoryToResponse(category)
-	return c.JSON(http.StatusOK, response)
+	categoryResponse := h.categoryToResponse(category)
+	return response.Success(c, "Category updated successfully", categoryResponse)
 }
 
 func (h *ProductHandler) DeleteCategory(c echo.Context) error {
@@ -430,21 +359,15 @@ func (h *ProductHandler) DeleteCategory(c echo.Context) error {
 
 	categoryID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid category ID",
-		})
+		return response.BadRequest(c, "Invalid category ID")
 	}
 
 	err = h.categoryService.Delete(c.Request().Context(), tenantID, categoryID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Category deleted successfully",
-	})
+	return response.Success(c, "Category deleted successfully", nil)
 }
 
 func (h *ProductHandler) GetCategoryHierarchy(c echo.Context) error {
@@ -452,9 +375,7 @@ func (h *ProductHandler) GetCategoryHierarchy(c echo.Context) error {
 
 	categories, err := h.categoryService.GetHierarchy(c.Request().Context(), tenantID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get category hierarchy",
-		})
+		return response.InternalError(c, "Failed to get category hierarchy")
 	}
 
 	categoryResponses := make([]domain.ProductCategoryResponse, len(categories))
@@ -462,9 +383,7 @@ func (h *ProductHandler) GetCategoryHierarchy(c echo.Context) error {
 		categoryResponses[i] = h.categoryToResponseWithHierarchy(category)
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"categories": categoryResponses,
-	})
+	return response.Success(c, "Category hierarchy retrieved successfully", categoryResponses)
 }
 
 // Helper functions

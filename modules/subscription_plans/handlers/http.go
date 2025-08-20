@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/exven/pos-system/modules/subscription_plans/domain"
+	"github.com/exven/pos-system/shared/utils/response"
 	"github.com/labstack/echo/v4"
 )
 
@@ -47,9 +47,7 @@ func (h *SubscriptionPlanHandler) GetSubscriptionPlans(c echo.Context) error {
 
 	plans, total, err := h.service.GetAll(c.Request().Context(), limit, offset)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to get subscription plans",
-		})
+		return response.InternalError(c, "Failed to get subscription plans")
 	}
 
 	planResponses := make([]domain.SubscriptionPlanResponse, len(plans))
@@ -57,33 +55,22 @@ func (h *SubscriptionPlanHandler) GetSubscriptionPlans(c echo.Context) error {
 		planResponses[i] = h.planToResponse(plan)
 	}
 
-	response := domain.SubscriptionPlanListResponse{
-		Plans: planResponses,
-		Total: total,
-		Page:  page,
-		Limit: limit,
-	}
-
-	return c.JSON(http.StatusOK, response)
+	return response.SuccessWithPagination(c, "Subscription plans retrieved successfully", planResponses, page, limit, int(total))
 }
 
 func (h *SubscriptionPlanHandler) GetSubscriptionPlan(c echo.Context) error {
 	planID, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid subscription plan ID",
-		})
+		return response.BadRequest(c, "Invalid subscription plan ID")
 	}
 
 	plan, err := h.service.GetByID(c.Request().Context(), planID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error": "Subscription plan not found",
-		})
+		return response.NotFound(c, "Subscription plan not found")
 	}
 
-	response := h.planToResponse(plan)
-	return c.JSON(http.StatusOK, response)
+	planResponse := h.planToResponse(plan)
+	return response.Success(c, "Subscription plan retrieved successfully", planResponse)
 }
 
 

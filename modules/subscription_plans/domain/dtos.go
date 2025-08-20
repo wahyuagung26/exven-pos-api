@@ -14,10 +14,3 @@ type SubscriptionPlanResponse struct {
 	CreatedAt               string   `json:"created_at"`
 	UpdatedAt               string   `json:"updated_at"`
 }
-
-type SubscriptionPlanListResponse struct {
-	Plans []SubscriptionPlanResponse `json:"plans"`
-	Total int64                      `json:"total"`
-	Page  int                        `json:"page"`
-	Limit int                        `json:"limit"`
-}
