@@ -1,0 +1,139 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Go workspace file
+go.work
+
+# Built binaries
+/cmd/api/api
+/cmd/migration/migration
+/cmd/worker/worker
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+logs/
+log/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.temp/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS generated files
+*.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# Coverage reports
+coverage.out
+coverage.html
+cover.out
+cover.html
+
+# Vendor directory (if using go modules with vendor)
+/vendor/
+
+# Configuration files (keep examples)
+config.json
+config.yaml
+config.yml
+
+# Docker volumes
+/docker/data/
+/docker/logs/
+
+# Upload directories
+uploads/
+files/
+images/
+storage/
+
+# Build artifacts
+dist/
+build/
+bin/
+
+# Dependency directories
+node_modules/
+
+# Test cache
+.testcache/
+
+# Profiling files
+*.prof
+
+# Local development certificates
+*.pem
+*.key
+*.crt
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# nyc test coverage
+.nyc_output/
+
+# Documentation build
+docs/_build/
+
+# API documentation
+/docs/api/
+
+# Application logs
+app.log
+error.log
+access.log
+
+# Development database dumps
+dump.sql
+*.dump
+
+# Local Docker overrides
+docker-compose.override.yml
+
+# Air live reload tool
+tmp/
