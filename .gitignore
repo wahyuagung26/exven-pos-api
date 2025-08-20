@@ -120,9 +120,6 @@ pids/
 # Documentation build
 docs/_build/
 
-# API documentation
-/docs/api/
-
 # Application logs
 app.log
 error.log

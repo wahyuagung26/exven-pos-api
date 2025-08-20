@@ -57,7 +57,7 @@ type Session struct {
 }
 
 type LoginCredentials struct {
-	Username string
+	Email    string
 	Password string
 }
 

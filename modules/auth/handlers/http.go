@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"net/http"
-
 	"github.com/exven/pos-system/modules/auth/domain"
+	"github.com/exven/pos-system/shared/utils/response"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,15 +30,11 @@ func (h *AuthHandler) RegisterRoutes(e *echo.Group) {
 func (h *AuthHandler) Login(c echo.Context) error {
 	var req domain.LoginRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.ValidationErrorFromErr(c, err)
 	}
 
 	credentials := domain.LoginCredentials{
@@ -49,12 +44,10 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	tokenPair, user, err := h.authService.Login(c.Request().Context(), credentials)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": err.Error(),
-		})
+		return response.Unauthorized(c, err.Error())
 	}
 
-	response := domain.LoginResponse{
+	loginResponse := domain.LoginResponse{
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
 		ExpiresIn:    tokenPair.ExpiresIn,
@@ -70,7 +63,7 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	}
 
 	if user.Role != nil {
-		response.User.Role = domain.RoleResponse{
+		loginResponse.User.Role = domain.RoleResponse{
 			ID:          user.Role.ID,
 			Name:        user.Role.Name,
 			DisplayName: user.Role.DisplayName,
@@ -78,31 +71,25 @@ func (h *AuthHandler) Login(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(http.StatusOK, response)
+	return response.Success(c, "Login successful", loginResponse)
 }
 
 func (h *AuthHandler) Register(c echo.Context) error {
 	var req domain.RegisterRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.ValidationErrorFromErr(c, err)
 	}
 
 	user, err := h.authService.Register(c.Request().Context(), req)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	response := domain.RegisterResponse{
+	registerResponse := domain.RegisterResponse{
 		TenantID: user.TenantID,
 		User: domain.UserResponse{
 			ID:       user.ID,
@@ -116,124 +103,92 @@ func (h *AuthHandler) Register(c echo.Context) error {
 		Message: "Registration successful. Please verify your email.",
 	}
 
-	return c.JSON(http.StatusCreated, response)
+	return response.Created(c, "Registration successful. Please verify your email.", registerResponse)
 }
 
 func (h *AuthHandler) RefreshToken(c echo.Context) error {
 	var req domain.RefreshTokenRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.ValidationErrorFromErr(c, err)
 	}
 
 	tokenPair, err := h.authService.RefreshToken(c.Request().Context(), req.RefreshToken)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{
-			"error": err.Error(),
-		})
+		return response.Unauthorized(c, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	refreshResponse := map[string]interface{}{
 		"access_token":  tokenPair.AccessToken,
 		"refresh_token": tokenPair.RefreshToken,
 		"expires_in":    tokenPair.ExpiresIn,
-	})
+	}
+
+	return response.Success(c, "Token refreshed successfully", refreshResponse)
 }
 
 func (h *AuthHandler) Logout(c echo.Context) error {
 	userID := c.Get("user_id").(uint64)
 
 	if err := h.authService.Logout(c.Request().Context(), userID); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to logout",
-		})
+		return response.InternalError(c, "Failed to logout")
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Logout successful",
-	})
+	return response.Success(c, "Logout successful", nil)
 }
 
 func (h *AuthHandler) ChangePassword(c echo.Context) error {
 	var req domain.ChangePasswordRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.ValidationErrorFromErr(c, err)
 	}
 
 	userID := c.Get("user_id").(uint64)
 
 	if err := h.authService.ChangePassword(c.Request().Context(), userID, req.OldPassword, req.NewPassword); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Password changed successfully",
-	})
+	return response.Success(c, "Password changed successfully", nil)
 }
 
 func (h *AuthHandler) ResetPassword(c echo.Context) error {
 	var req domain.ResetPasswordRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.ValidationErrorFromErr(c, err)
 	}
 
 	if err := h.authService.ResetPassword(c.Request().Context(), req.Email); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Password reset instructions sent to your email",
-	})
+	return response.Success(c, "Password reset instructions sent to your email", nil)
 }
 
 func (h *AuthHandler) VerifyEmail(c echo.Context) error {
 	var req domain.VerifyEmailRequest
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": "Invalid request format",
-		})
+		return response.BadRequest(c, "Invalid request format")
 	}
 
 	if err := c.Validate(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.ValidationErrorFromErr(c, err)
 	}
 
 	if err := h.authService.VerifyEmail(c.Request().Context(), req.Token); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
-		})
+		return response.BadRequest(c, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Email verified successfully",
-	})
+	return response.Success(c, "Email verified successfully", nil)
 }

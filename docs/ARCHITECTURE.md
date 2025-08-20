@@ -105,6 +105,265 @@ modules/[module_name]/
 └── module.go             # Module registration with DI container
 ```
 
+## Standard Response Structure
+
+### Success Response
+```json
+{
+  "message": "Data retrieved successfully",
+  "data": {},
+  "meta": {
+    "page": 1,
+    "per_page": 20,
+    "total": 150
+  }
+}
+```
+
+### Error Response
+```json
+{
+  "message": "Validation failed",
+  "data": null,
+  "errors": {
+    "name": ["Name is required"],
+    "email": ["Invalid email format"]
+  }
+}
+```
+
+## Response Examples
+
+### Success Response - Single Item
+```json
+{
+  "message": "Product retrieved successfully",
+  "data": {
+    "id": 1,
+    "sku": "PROD001",
+    "name": "Product A",
+    "price": 75000.00,
+    "stock": 100
+  },
+  "meta": null
+}
+```
+
+### Success Response - List with Pagination
+```json
+{
+  "message": "Products retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "sku": "PROD001",
+      "name": "Product A",
+      "price": 75000.00,
+      "stock": 100
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "per_page": 20,
+    "total": 150
+  }
+}
+```
+
+### Success Response - Create/Update
+```json
+{
+  "message": "Product created successfully",
+  "data": {
+    "id": 1,
+    "sku": "PROD001",
+    "name": "Product A",
+    "price": 75000.00,
+    "created_at": "2025-08-20T10:30:00Z"
+  },
+  "meta": null
+}
+```
+
+### Error Response - Validation
+```json
+{
+  "message": "Validation failed",
+  "data": null,
+  "errors": {
+    "name": ["Name is required"],
+    "email": ["Invalid email format"],
+    "price": ["Price must be greater than 0"]
+  }
+}
+```
+
+### Error Response - Business Logic
+```json
+{
+  "message": "Insufficient stock",
+  "data": null,
+  "errors": {
+    "stock": ["Available stock is only 5, cannot sell 10 items"]
+  }
+}
+```
+
+## Go Implementation
+
+### Response Types
+```go
+// shared/types/response.go
+package types
+
+type SuccessResponse struct {
+    Message string      `json:"message"`
+    Data    interface{} `json:"data"`
+    Meta    *Meta       `json:"meta"`
+}
+
+type ErrorResponse struct {
+    Message string                 `json:"message"`
+    Data    interface{}            `json:"data"`
+    Errors  map[string][]string    `json:"errors"`
+}
+
+type Meta struct {
+    Page    int `json:"page,omitempty"`
+    PerPage int `json:"per_page,omitempty"`
+    Total   int `json:"total,omitempty"`
+}
+```
+
+### Response Builder
+```go
+// shared/utils/response/response.go
+package response
+
+import (
+    "net/http"
+    "github.com/labstack/echo/v4"
+    "your-project/shared/types"
+)
+
+// Success response for single item
+func Success(c echo.Context, message string, data interface{}) error {
+    response := types.SuccessResponse{
+        Message: message,
+        Data:    data,
+        Meta:    nil,
+    }
+    return c.JSON(http.StatusOK, response)
+}
+
+// Success response for list with pagination
+func SuccessWithPagination(c echo.Context, message string, data interface{}, page, perPage, total int) error {
+    response := types.SuccessResponse{
+        Message: message,
+        Data:    data,
+        Meta: &types.Meta{
+            Page:    page,
+            PerPage: perPage,
+            Total:   total,
+        },
+    }
+    return c.JSON(http.StatusOK, response)
+}
+
+// Error response with validation errors
+func ValidationError(c echo.Context, fieldErrors map[string][]string) error {
+    response := types.ErrorResponse{
+        Message: "Validation failed",
+        Data:    nil,
+        Errors:  fieldErrors,
+    }
+    return c.JSON(http.StatusBadRequest, response)
+}
+
+// Error response with custom message and errors
+func Error(c echo.Context, statusCode int, message string, errors map[string][]string) error {
+    if errors == nil {
+        errors = make(map[string][]string)
+    }
+    
+    response := types.ErrorResponse{
+        Message: message,
+        Data:    nil,
+        Errors:  errors,
+    }
+    return c.JSON(statusCode, response)
+}
+```
+
+### Usage in Handlers
+```go
+// modules/products/handlers/http.go
+package handlers
+
+import (
+    "github.com/labstack/echo/v4"
+    "your-project/shared/utils/response"
+)
+
+type ProductHandler struct {
+    productService ProductService
+}
+
+// Get single product
+func (h *ProductHandler) GetProduct(c echo.Context) error {
+    id := c.Param("id")
+    
+    product, err := h.productService.GetByID(ctx, id)
+    if err != nil {
+        if errors.Is(err, ErrProductNotFound) {
+            return response.NotFound(c, "Product not found")
+        }
+        return response.InternalError(c, "Failed to get product")
+    }
+    
+    return response.Success(c, "Product retrieved successfully", product)
+}
+
+// Get product list
+func (h *ProductHandler) GetProducts(c echo.Context) error {
+    page := getPageFromQuery(c)
+    perPage := getPerPageFromQuery(c)
+    
+    products, total, err := h.productService.GetList(ctx, page, perPage)
+    if err != nil {
+        return response.InternalError(c, "Failed to get products")
+    }
+    
+    return response.SuccessWithPagination(c, "Products retrieved successfully", products, page, perPage, total)
+}
+
+// Create product
+func (h *ProductHandler) CreateProduct(c echo.Context) error {
+    var req CreateProductRequest
+    if err := c.Bind(&req); err != nil {
+        return response.BadRequest(c, "Invalid request format")
+    }
+    
+    // Validation
+    if validationErrors := validateCreateProduct(req); len(validationErrors) > 0 {
+        return response.ValidationError(c, validationErrors)
+    }
+    
+    product, err := h.productService.Create(ctx, req)
+    if err != nil {
+        if errors.Is(err, ErrDuplicateSKU) {
+            errors := map[string][]string{
+                "sku": {"SKU already exists"},
+            }
+            return response.Error(c, http.StatusConflict, "Product SKU already exists", errors)
+        }
+        return response.InternalError(c, "Failed to create product")
+    }
+    
+    return response.Created(c, "Product created successfully", product)
+}
+```
+
 ## Key Features to Implement
 
 ### 1. Multi-Tenancy
@@ -395,6 +654,7 @@ func main() {
 5. **Single Binary**: All modules compile into one executable
 6. **DI Pattern**: Use dependency injection for all service dependencies
 7. **Mock Testing**: Generate mocks for all interfaces for unit testing
+8. **Active Records Filter**: Every query on tables with `is_active` column must include `is_active = true` filter to only retrieve active records
 
 ## Sample Module Implementation
 
